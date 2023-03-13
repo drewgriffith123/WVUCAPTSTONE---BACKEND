@@ -15,7 +15,8 @@ try {
 
     // Executes the query
     $stmt = $conn->query($tsql);
-    echo "hello";
+    return $stmt;
+    
 } catch (PDOException $exception1) {
     echo "<h1>Caught PDO exception:</h1>";
     echo "<h1>PHP Info for troubleshooting</h1>";
