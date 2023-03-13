@@ -3,6 +3,7 @@
     try {
         $conn = new PDO("sqlsrv:server = tcp:wvurms.database.windows.net,1433; Database = RMS APP", "azureuser", "WVUrms12");
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        echo "hello";
     }
     catch (PDOException $e) {
         echo "Error connecting to SQL Server.";
