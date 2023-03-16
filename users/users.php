@@ -17,9 +17,10 @@
     } else {
         echo "Statement executed \n";
     }
-    $numRows = sqlsrv_num_rows($stmt);
    
-    echo "Number of rows: $numRows \n";
+    echo "Number of rows: ";
+    echo sqlsrv_num_rows($stmt);
+    echo "\n";
 
     if( sqlsrv_fetch( $stmt ) === false){  
          echo "Error in retrieving row.\n";  
@@ -27,8 +28,10 @@
     }  
 
     $name = sqlsrv_get_field( $stmt, 0);  
-    echo "$name: ";  
-    
+    echo "$name";  
+    $userName = sqlsrv_get_field( $stmt, 4);  
+    echo "$userName";  
+
 
     
     /* Make the first row of the result set available for reading. */  
