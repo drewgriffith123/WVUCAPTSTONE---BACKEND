@@ -3,7 +3,7 @@
     try {
         $conn = new PDO("sqlsrv:server = tcp:wvurms.database.windows.net,1433; Database = RMS APP", "azureuser", "WVUrms12");
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        echo "hello";
+        
     }
     catch (PDOException $e) {
         echo "Error connecting to SQL Server.";
@@ -11,8 +11,11 @@
     }
 
     // SQL Server Extension Sample Code:
-    $connectionInfo = array("UID" => "azureuser", "pwd" => "{your_password_here}", "Database" => "RMS APP", "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0);
+    $connectionInfo = array("UID" => "azureuser", "pwd" => "WVUrms12", "Database" => "RMS APP", "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0);
     $serverName = "tcp:wvurms.database.windows.net,1433";
     $conn = sqlsrv_connect($serverName, $connectionInfo);
+    echo $conn;
+
+
 ?>
   
