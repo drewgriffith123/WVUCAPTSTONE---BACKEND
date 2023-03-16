@@ -12,7 +12,9 @@
     $sql = "SELECT * FROM [dbo].[Users]";
             // $expr = sqlsrv_query($conn, $sql);
     $res = sqlsrv_query($db, $sql);
-    http_response_code(200);     
+    echo $res;
     echo json_encode($res);
+    echo sqlsrv_errors();
+    http_response_code(200);     
 ?>
 
