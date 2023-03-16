@@ -28,9 +28,9 @@
     }  
 
     $name = sqlsrv_get_field( $stmt, 0);  
-    echo "$name";  
-    $userName = sqlsrv_get_field( $stmt, 4);  
-    echo "$userName";  
+    echo "$name \n";  
+    $userName = sqlsrv_get_field( $stmt, 5);  
+    echo "$userName ";  
 
 
     
