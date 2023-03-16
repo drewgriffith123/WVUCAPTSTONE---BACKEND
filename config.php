@@ -1,5 +1,6 @@
 <?php
     // PHP Data Objects(PDO) Sample Code:
+
     try {
         $conn = new PDO("sqlsrv:server = tcp:wvurms.database.windows.net,1433; Database = RMS APP", "azureuser", "WVUrms12");
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -21,8 +22,8 @@
     if( $stmt === false ) {
         die( print_r( sqlsrv_errors(), true));
     }
-    
-    return $expr;
+
+    echo $expr;
 
 ?>
   
