@@ -18,6 +18,8 @@
         print_r($err);
         echo "<br/>";
     }
+    print_r($res);
+    print_r(json_encode($res));
     echo json_encode($res);
     http_response_code(200);     
 ?>
