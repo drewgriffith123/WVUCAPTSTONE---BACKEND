@@ -13,35 +13,21 @@
     if( $stmt === false ){  
      echo "Error in statement preparation/execution.\n";  
      die( print_r( sqlsrv_errors(), true));  
-    }  
-    
-    // if ($stmt = sqlsrv_prepare($conn, $sql)) {
-    //     echo "Statement prepared.\n";  
-    // } else {  
-    //     echo "Statement could not be prepared.\n";  
-    //     die(print_r(sqlsrv_errors(), true));  
-    // }
-
-    // if (sqlsrv_execute($stmt)) {  
-    //     echo "Statement executed.\n";  
-    // } else {  
-    //     echo "Statement could not be executed.\n";  
-    //     die(print_r(sqlsrv_errors(), true));  
-    // }
+    } 
 
     /* Make the first row of the result set available for reading. */  
-    if( sqlsrv_fetch( $stmt ) === false)  {  
+    if($res = sqlsrv_fetch_row( $stmt ) === false)  {  
      echo "Error in retrieving row.\n";  
      die( print_r( sqlsrv_errors(), true));  
     }       
 
-    $name = sqlsrv_get_field( $stmt, 0);  
-    echo "$name: ";  
-
-    echo $stmt;
+    // $name = sqlsrv_get_field( $stmt, 0);  
+    // echo "$name: ";  
+    echo $res;
 
     print_r(json_encode($stmt));
     echo json_encode($stmt);
     http_response_code(200);     
+    sqlsrv_free_stmt($stmt);
 ?>
 
