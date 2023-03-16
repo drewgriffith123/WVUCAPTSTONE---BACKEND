@@ -13,8 +13,12 @@
             // $expr = sqlsrv_query($conn, $sql);
     $res = sqlsrv_query($db, $sql);
     echo $res;
+    if ($err = sqlsrv_errors()) {
+        echo "There were errors or warnings!<br/>";
+        print_r($err);
+        echo "<br/>";
+    }
     echo json_encode($res);
-    echo sqlsrv_errors();
     http_response_code(200);     
 ?>
 
