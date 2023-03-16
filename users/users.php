@@ -19,32 +19,32 @@
     }
    
     echo "Number of rows: ";
-    echo sqlsrv_num_rows($stmt);
-    echo "\n";
+    $rowNum =  sqlsrv_num_rows($stmt);
+    echo "$rowNum \n";
 
-    if( sqlsrv_fetch( $stmt ) === false){  
-         echo "Error in retrieving row.\n";  
-         die( print_r( sqlsrv_errors(), true));  
-    }  
+    // if( sqlsrv_fetch( $stmt ) === false){  
+    //      echo "Error in retrieving row.\n";  
+    //      die( print_r( sqlsrv_errors(), true));  
+    // }  
 
-    $name = sqlsrv_get_field( $stmt, 0);  
-    echo "$name \n";  
-    $userName = sqlsrv_get_field( $stmt, 5);  
-    echo "$userName ";  
+    // $name = sqlsrv_get_field( $stmt, 0);  
+    // echo "$name \n";  
+    // $userName = sqlsrv_get_field( $stmt, 5);  
+    // echo "$userName ";  
 
 
     
     /* Make the first row of the result set available for reading. */  
-    // while($row = sqlsrv_fetch_row( $stmt, SQLSRV_FETCH_NUMERIC ))  {  
-    //     echo "UserID: ".$row[0]."\n";  
-    //     echo "FirstName: ".$row[1]."\n";  
-    //     echo "MiddleName: ".$row[2]."\n";  
-    //     echo "LastName: ".$row[3]."\n"; 
-    //     echo "UserType: ".$row[4]."\n"; 
-    //     echo "UserName: ".$row[5]."\n"; 
-    //     echo "Password: ".$row[6]."\n"; 
-    //     echo json_encode($row);  
-    // }       
+    while($row = sqlsrv_fetch_row( $stmt, SQLSRV_FETCH_NUMERIC ))  {  
+        echo "UserID: $row[0] \n";  
+        echo "FirstName: ".$row[1]."\n";  
+        echo "MiddleName: ".$row[2]."\n";  
+        echo "LastName: ".$row[3]."\n"; 
+        echo "UserType: ".$row[4]."\n"; 
+        echo "UserName: ".$row[5]."\n"; 
+        echo "Password: ".$row[6]."\n"; 
+        echo json_encode($row);  
+    }       
 
 
     // $name = sqlsrv_get_field( $stmt, 0);  
