@@ -8,15 +8,18 @@
     $database = new database();
     $db = $database->getConnection();
 
-    $sql = "SELECT * FROM [dbo].[Users]";
-    $stmt = sqlsrv_query($db, $sql);
+    $tsql = "SELECT * FROM [dbo].[Users]";
+    $stmt = sqlsrv_query($db, $tsql);
     if( $stmt === false ){  
      echo "Error in statement preparation/execution.\n";  
      die( print_r( sqlsrv_errors(), true));  
-    } 
+    } else {
+        echo "Statement executed \n";
+    }
+
 
     /* Make the first row of the result set available for reading. */  
-    while($row = sqlsrv_fetch_row( $stmt ))  {  
+    while($row = sqlsrv_fetch_row( $stmt, SQLSRV_FETCH_NUMERIC ))  {  
         echo "UserID: ".$row[0]."\n";  
         echo "FirstName: ".$row[1]."\n";  
         echo "MiddleName: ".$row[2]."\n";  
@@ -24,7 +27,7 @@
         echo "UserType: ".$row[4]."\n"; 
         echo "UserName: ".$row[5]."\n"; 
         echo "Password: ".$row[6]."\n"; 
-        echo json_encode(array($row));  
+        echo json_encode($row);  
     }       
 
 
