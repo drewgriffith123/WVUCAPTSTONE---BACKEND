@@ -19,7 +19,7 @@
     }
     $numRows = sqlsrv_num_rows($stmt);
    
-    echo "Number of rows: $numRows";
+    echo "Number of rows: $numRows \n";
 
     if( sqlsrv_fetch( $stmt ) === false){  
          echo "Error in retrieving row.\n";  
@@ -28,10 +28,8 @@
 
     $name = sqlsrv_get_field( $stmt, 0);  
     echo "$name: ";  
-
     
-    $all = $stmt->fetchAll( PDO::FETCH_CLASS, 'cc', array( 'Hi!' ));  
-    var_dump( $all );  
+
     
     /* Make the first row of the result set available for reading. */  
     // while($row = sqlsrv_fetch_row( $stmt, SQLSRV_FETCH_NUMERIC ))  {  
