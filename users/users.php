@@ -6,21 +6,42 @@
     // header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
     include '../config.php';
     $database = new database();
-    echo 'hi';
     $db = $database->getConnection();
-    echo 'hey';
+
     $sql = "SELECT * FROM [dbo].[Users]";
-            // $expr = sqlsrv_query($conn, $sql);
-    $res = sqlsrv_query($db, $sql);
-    echo $res;
-    if ($err = sqlsrv_errors()) {
-        echo "There were errors or warnings!<br/>";
-        print_r($err);
-        echo "<br/>";
-    }
-    print_r($res);
-    print_r(json_encode($res));
-    echo json_encode($res);
+    $stmt = sqlsrv_query($db, $sql);
+    if( $stmt === false ){  
+     echo "Error in statement preparation/execution.\n";  
+     die( print_r( sqlsrv_errors(), true));  
+    }  
+    
+    // if ($stmt = sqlsrv_prepare($conn, $sql)) {
+    //     echo "Statement prepared.\n";  
+    // } else {  
+    //     echo "Statement could not be prepared.\n";  
+    //     die(print_r(sqlsrv_errors(), true));  
+    // }
+
+    // if (sqlsrv_execute($stmt)) {  
+    //     echo "Statement executed.\n";  
+    // } else {  
+    //     echo "Statement could not be executed.\n";  
+    //     die(print_r(sqlsrv_errors(), true));  
+    // }
+
+    /* Make the first row of the result set available for reading. */  
+    if( sqlsrv_fetch( $stmt ) === false)  {  
+     echo "Error in retrieving row.\n";  
+     die( print_r( sqlsrv_errors(), true));  
+    }       
+
+    $name = sqlsrv_get_field( $stmt, 0);  
+    echo "$name: ";  
+
+    echo $stmt;
+
+    print_r(json_encode($stmt));
+    echo json_encode($stmt);
     http_response_code(200);     
 ?>
 
