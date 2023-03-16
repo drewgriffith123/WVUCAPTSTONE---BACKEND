@@ -1,4 +1,5 @@
 <?php 
+    // https://learn.microsoft.com/en-us/sql/connect/php/sqlsrv-get-field?view=sql-server-ver16
     header("Access-Control-Allow-Origin: *");
     header("Content-Type: application/json; charset=UTF-8");
     header("Access-Control-Allow-Methods: GET");
@@ -16,10 +17,22 @@
     } else {
         echo "Statement executed \n";
     }
+    $numRows = sqlsrv_num_rows($stmt);
+   
+    echo "Number of rows: $numRows";
 
-    $row = sqlsrv_fetch($stmt);
+    if( sqlsrv_fetch( $stmt ) === false){  
+         echo "Error in retrieving row.\n";  
+         die( print_r( sqlsrv_errors(), true));  
+    }  
+
+    $name = sqlsrv_get_field( $stmt, 0);  
+    echo "$name: ";  
+
     
-    echo $row;
+    $all = $stmt->fetchAll( PDO::FETCH_CLASS, 'cc', array( 'Hi!' ));  
+    var_dump( $all );  
+    
     /* Make the first row of the result set available for reading. */  
     // while($row = sqlsrv_fetch_row( $stmt, SQLSRV_FETCH_NUMERIC ))  {  
     //     echo "UserID: ".$row[0]."\n";  
