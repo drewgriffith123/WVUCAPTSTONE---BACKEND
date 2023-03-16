@@ -17,7 +17,7 @@
 
     /* Make the first row of the result set available for reading. */  
     while($res = sqlsrv_fetch_row( $stmt ))  {  
-     echo res;  
+     echo $res;  
     }       
 
 
