@@ -6,10 +6,12 @@
     // header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
     include '../config.php';
     $database = new database();
+    echo 'hi';
     $db = $database->getConnection();
-        // $testSQL = "SELECT UserId, FirstName, LastName, PlayerNumber FROM [dbo].[Users] WHERE UserType = \'P\'";
+    echo 'hey';
+    $sql = "SELECT * FROM [dbo].[Users]";
             // $expr = sqlsrv_query($conn, $sql);
-    db->sqlsrv_query($conn, $sql);
+    db->sqlsrv_query($db, $sql);
     http_response_code(200);     
     echo json_encode($db);
 ?>
