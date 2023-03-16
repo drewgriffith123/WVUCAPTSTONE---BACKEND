@@ -11,7 +11,7 @@
     echo 'hey';
     $sql = "SELECT * FROM [dbo].[Users]";
             // $expr = sqlsrv_query($conn, $sql);
-    db->sqlsrv_query($db, $sql);
+    sqlsrv_query($db, $sql);
     http_response_code(200);     
     echo json_encode($db);
 ?>
