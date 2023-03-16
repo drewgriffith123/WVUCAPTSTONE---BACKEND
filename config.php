@@ -14,8 +14,12 @@
     $connectionInfo = array("UID" => "azureuser", "pwd" => "WVUrms12", "Database" => "RMS APP", "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0);
     $serverName = "tcp:wvurms.database.windows.net,1433";
     $conn = sqlsrv_connect($serverName, $connectionInfo);
-    echo $conn;
+    
+    $testSQL = "SELECT UserId, FirstName, LastName, PlayerNumber FROM [dbo].[Users] WHERE UserType = \'P\'";
+    $expr = sqlsrv_query($conn, $sql);
 
-
+    if( $stmt === false ) {
+        die( print_r( sqlsrv_errors(), true));
+   }
 ?>
   
