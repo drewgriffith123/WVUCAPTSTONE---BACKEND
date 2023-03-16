@@ -16,14 +16,14 @@
     } 
 
     /* Make the first row of the result set available for reading. */  
-    if($res = sqlsrv_fetch_row( $stmt ) === false)  {  
-     echo "Error in retrieving row.\n";  
-     die( print_r( sqlsrv_errors(), true));  
+    while($res = sqlsrv_fetch_row( $stmt ))  {  
+     echo res;  
     }       
+
 
     // $name = sqlsrv_get_field( $stmt, 0);  
     // echo "$name: ";  
-    echo $res;
+    // echo $res;
 
     print_r(json_encode($stmt));
     echo json_encode($stmt);
