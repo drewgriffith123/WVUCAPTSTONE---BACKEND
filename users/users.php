@@ -16,7 +16,7 @@
     } 
 
     /* Make the first row of the result set available for reading. */  
-    while($res = sqlsrv_fetch_row( $stmt ))  {  
+    while($row = sqlsrv_fetch_row( $stmt ))  {  
         echo "UserID: ".$row[0]."\n";  
         echo "FirstName: ".$row[1]."\n";  
         echo "MiddleName: ".$row[2]."\n";  
@@ -24,7 +24,7 @@
         echo "UserType: ".$row[4]."\n"; 
         echo "UserName: ".$row[5]."\n"; 
         echo "Password: ".$row[6]."\n"; 
-        print_r($res);  
+        print_r($row);  
     }       
 
 
