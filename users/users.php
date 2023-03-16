@@ -1,7 +1,7 @@
 <?php 
-    // header("Access-Control-Allow-Origin: *");
-    // header("Content-Type: application/json; charset=UTF-8");
-    // header("Access-Control-Allow-Methods: POST");
+    header("Access-Control-Allow-Origin: *");
+    header("Content-Type: application/json; charset=UTF-8");
+    header("Access-Control-Allow-Methods: GET");
     // header("Access-Control-Max-Age: 3600");
     // header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
     include '../config.php';
@@ -24,7 +24,7 @@
         echo "UserType: ".$row[4]."\n"; 
         echo "UserName: ".$row[5]."\n"; 
         echo "Password: ".$row[6]."\n"; 
-        print_r($row);  
+        echo json_encode(array($row));  
     }       
 
 
@@ -32,7 +32,6 @@
     // echo "$name: ";  
     // echo $res;
 
-    print_r(json_encode($stmt));
     echo json_encode($stmt);
     http_response_code(200);     
     sqlsrv_free_stmt($stmt);
