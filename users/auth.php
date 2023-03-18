@@ -25,7 +25,7 @@
         }
 
         $row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_NUMERIC );
-        echo $row;
+        echo json_encode($row);
 
     }
 
