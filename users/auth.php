@@ -9,6 +9,10 @@
     $database = new database();
     $db = $database->getConnection();
 
+    if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'hello') {
+        hello();
+    }
+
     function hello(){
         echo 'hello';
     }
