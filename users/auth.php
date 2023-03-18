@@ -14,6 +14,7 @@
     // returns session ID as cookie
     // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/auth.php?action=login&name=john&password=smith
     function login(){
+        echo 'in login';
         $name = $_GET['name'];
         $password = $_GET['password'];
 
