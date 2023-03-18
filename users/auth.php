@@ -24,8 +24,9 @@
             die( print_r( sqlsrv_errors(), true));  
         }
 
-        $row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_NUMERIC );
-        echo json_encode($row);
+        if($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_NUMERIC ))
+            echo json_encode($row);
+        else echo 'wtf';
 
     }
 
