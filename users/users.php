@@ -14,8 +14,6 @@
     if( $stmt === false ){  
      echo "Error in statement preparation/execution.\n";  
      die( print_r( sqlsrv_errors(), true));  
-    } else {
-        echo "Statement executed \n";
     }
     $array = array();
     /* Make the first row of the result set available for reading. */  
