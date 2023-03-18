@@ -1,10 +1,7 @@
 <?php 
-    // https://learn.microsoft.com/en-us/sql/connect/php/sqlsrv-get-field?view=sql-server-ver16
     header("Access-Control-Allow-Origin: *");
     header("Content-Type: application/json; charset=UTF-8");
     header("Access-Control-Allow-Methods: GET, POST");
-    // header("Access-Control-Max-Age: 3600");
-    // header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
     include '../config.php';
     $database = new database();
     $db = $database->getConnection();
@@ -13,17 +10,28 @@
         login();
     }
 
+    // get request to login evaluates the username and password credientials
+    // returns session ID as cookie
+    // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/auth.php?action=login&name=john&password=smith
     function login(){
-
         $name = $_GET['name'];
-        echo "Hello, $name!";
-        
         $password = $_GET['password'];
-        echo "Password, $password!";
-        
+
+        $tsql = "SELECT Username, Password FROM [dbo].[Users] WHERE Username = \'$name\'";
+        $stmt = sqlsrv_query($db, $tsql);
+        if( $stmt === false ){  
+            echo "Error in statement preparation/execution.\n";  
+            die( print_r( sqlsrv_errors(), true));  
+        }
+
+        $row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_NUMERIC );
+        echo $row;
+
     }
 
-    function hi(){
+    // before any request/post is requred we run the middleware auth to evaluate
+    // session cookie token is active
+    function middlewareAuth(){
         echo 'hi';
     }
 
