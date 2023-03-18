@@ -18,6 +18,8 @@
         $name = $_GET['name'];
         $password = $_GET['password'];
 
+        echo $name;
+        echo $password;
         $tsql = "SELECT Username, Password FROM [dbo].[Users] WHERE Username = \'$name\'";
         $stmt = sqlsrv_query($db, $tsql);
         if( $stmt === false ){  
