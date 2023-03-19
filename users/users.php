@@ -162,7 +162,6 @@
 
     }
 
-
     // $array = array();
     /* Make the first row of the result set available for reading. */  
     // while($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_NUMERIC ))  {  
