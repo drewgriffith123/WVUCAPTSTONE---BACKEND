@@ -6,7 +6,6 @@
             try {
                 $conn = new PDO("sqlsrv:server = tcp:wvurms.database.windows.net,1433; Database = RMS APP", "azureuser", "WVUrms12");
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                
             }catch (PDOException $e) {
                 echo "Error connecting to SQL Server.";
                 die(print_r($e));
@@ -22,7 +21,7 @@
             // $testSQL = "SELECT UserId, FirstName, LastName, PlayerNumber FROM [dbo].[Users] WHERE UserType = \'P\'";
             // $expr = sqlsrv_query($conn, $sql);
         }
-        
+
     }
 
 ?>
