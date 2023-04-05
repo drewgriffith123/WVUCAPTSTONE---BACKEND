@@ -134,15 +134,277 @@
 
         }
 
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=getUserRoutines
         function getUserRoutines(){
-            // returns all routines assigned to specific user
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $tsql = "SELECT AssignmentId, RoutineId, Notes FROM [dbo].[Assignments] WHERE UserId = '$this->UserID'";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if( $stmt === false ){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), true));  
+            }
+            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+            if($row === NULL){
+                echo "User does not exist.";
+            }
+            echo json_encode($row);
+            http_response_code(200);
 
         }
 
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=assignUserRoutines&user=1&routine=1&notes=Rest
         function assignUserRoutines(){
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $user_ID = $_GET['user'];
+            $routine_ID = $_GET['routine'];
+            $notes = $_GET['notes'];
+            
+            $tsql = "INSERT INTO [dbo].[Assignments] values ($user_ID,$routine_ID,'$notes')";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+            echo json_encode(True);
+            return True;
             // Assigns a user a routine
             // Evaluate Privledges
 
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=addExercise&name=HamstringStretch&link=https://www.youtube.com/watch?v=T_l0AyZywjU&description=Hold
+        function addExercise() {
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $name = $_GET['name'];
+            $link = $_GET['link'];
+            $descript = $_GET['description'];
+
+            $check = "SELECT ExerciseId FROM [dbo].[Exercises] WHERE ExerciseName = '$name'";
+            $res = sqlsrv_query($db, $check);
+            $r = sqlsrv_fetch_array( $res, SQLSRV_FETCH_NUMERIC );
+            if( $r !== NULL ){
+                echo 'Exercise Already Exists.';
+                echo json_encode("ID: $r[0]");
+                http_response_code(409); 
+                sqlsrv_free_stmt($res);
+                sqlsrv_close($db);
+                return False;
+            }
+
+            $tsql = "INSERT INTO [dbo].[Exercises] values ('$name','$link','$descript')";
+            
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+            echo json_encode(True);
+            return True;
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=removeUser&ID=2
+        function removeUser(){
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $ID = $_GET['ID'];
+
+            $tsql = "DELETE FROM [dbo].[Users] WHERE UserId = $ID";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+
+            echo json_encode(True);
+            return True;
+
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=getExercise&ID=2
+        function getExercise(){
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $ID = $_GET['ID'];
+
+            $tsql = "SELECT ExerciseName, Link, Descript FROM [dbo].[Exercises] WHERE ExerciseId = $ID";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if( $stmt === false ){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), true));  
+            }
+            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+            if($row === NULL){
+                echo "Exercise does not exist.";
+            }
+            echo json_encode($row);
+            http_response_code(200);
+
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=getRoutines
+        function getRoutines() {
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $tsql = "SELECT RoutineId, RoutineName FROM [dbo].[Routines] WHERE Visible = 1 ORDER BY RoutineName";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if( $stmt === false ){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), true));  
+            }
+            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+            if($row === NULL){
+                echo "No Routines in System.";
+            }
+            echo json_encode($row);
+            http_response_code(200);
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=removeRoutine&ID=3
+        function removeRoutine() {
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $ID = $_GET['ID'];
+
+            $tsql = "DELETE FROM [dbo].[Assignments] WHERE AssignmentId = $ID";
+            $stmt = sqlsrv_query($this->db, $tsql);
+
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+
+            echo json_encode(True);
+            return True;
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=createRoutine&name=Legs1&IDs=4/5/6&reps=10/10/10&sets=3/4/5&visible=1
+        function createRoutine() {
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $user_name = $_GET['name'];
+            $password = md5($_GET['password']);
+            $first_name = $_GET['firstname'];
+            $middle_name = $_GET['middlename'];
+            $last_name = $_GET['lastname'];
+            $type = $_GET['type'];
+            $player_number = $_GET['playernumber'];
+            $code = $_GET['code'];
+
+            // Check if routine exists
+            $check = "SELECT UserID FROM [dbo].[Users] WHERE Username = '$user_name'";
+            $res = sqlsrv_query($db, $check);
+            $r = sqlsrv_fetch_array( $res, SQLSRV_FETCH_NUMERIC );
+            if( $r !== NULL ){
+                echo 'Routine Name Exists.';
+                echo json_encode("ID: $r[0]");
+                http_response_code(409); 
+                sqlsrv_free_stmt($res);
+                sqlsrv_close($db);
+                return False;
+            }
+        }
+
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=roster&name=Chase&position=WR
+        function roster() {
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $name = $_GET['name'];
+            $pos = $_GET['position'];
+
+            $tsql = "SELECT UserId, FirstName, LastName, PlayerNumber, Position FROM [dbo].[Users] WHERE UserType = 'P'";
+
+            if ($pos != "") {
+                if ($pos == "O") {
+                    $tsql .= " AND (Position = 'C' OR Position = 'OG' OR Position = 'OT' OR Position = 'RB' OR Position = 'QB' OR Position = 'WR' OR Position = 'TE')";
+                }
+                else if ($pos == "D") {
+                    $tsql .= " AND (Position = 'DT' OR Position = 'DE' OR Position = 'MLB' OR Position = 'OLB' OR Position = 'CB' OR Position = 'S')";
+                }
+                else if ($pos == "ST") {
+                    $tsql .= " AND (Position = 'P' OR Position = 'K' OR Position = 'H' OR Position = 'LS' OR Position = 'KR' OR Position = 'PR')";
+                }
+                else{
+                    $tsql .= " AND Position = '$pos'";
+                }
+            }
+            if ($name != "") {
+                if (strpos($name," ") >= 0) {
+                    strtolower($name);
+                    $names = split(" ",$name);
+                    $tsql .= " AND (lower(FirstName) like '$names[0]%' AND lower(LastName) like '$names[1]%')";
+                }
+                else {
+                    strtolower($name);
+                    $tsql .= " AND (lower(FirstName) like '$name%' OR lower(LastName) like '$name%')";
+                }
+            }
+            
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if( $stmt === false ){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), true));  
+            }
+            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+            if($row === NULL){
+                echo "";
+            }
+            echo json_encode($row);
+            http_response_code(200);
         }
 
         function getUserNotes(){
