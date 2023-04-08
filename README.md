@@ -12,6 +12,8 @@ Send all traffic here.
 Parameters in a url look like: 
 **/filePath?{variable}={value}&{variable}={value}...** 
 (Continued for however many parameters needed.)
+
+
 # Login, Logout, & Create an Account 
 All auth methods below
 ## Login | /users/auth.php
@@ -84,6 +86,8 @@ EXAMPLE:
 
     https://restapi-playerscompanion.azurewebsites.net/users/auth.php?action=logout&userid=15
 https://restapi-playerscompanion.azurewebsites.net/users/auth.php?action=logout&userid=15
+
+
 
 # User Data
 All ways to get a users assigned workouts / user info
