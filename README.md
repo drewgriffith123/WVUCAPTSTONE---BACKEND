@@ -12,7 +12,7 @@ Send all traffic here.
 Parameters in a url look like: 
 **/filePath?{variable}={value}&{variable}={value}...** 
 (Continued for however many parameters needed.)
-## Login, Logout, & Create an Account 
+# Login, Logout, & Create an Account 
 All auth methods below
 ## Login | /users/auth.php
 To have a user create an account we need to send the api the information of the user through the parameters in the URL.
@@ -85,7 +85,7 @@ EXAMPLE:
     https://restapi-playerscompanion.azurewebsites.net/users/auth.php?action=logout&userid=15
 https://restapi-playerscompanion.azurewebsites.net/users/auth.php?action=logout&userid=15
 
-## User Data
+# User Data
 All ways to get a users assigned workouts / user info
 
 **All requests to this endpoint must have the bearer token in the authorization header of the get request. You will not be able to get information if the user does not have a active session.**
