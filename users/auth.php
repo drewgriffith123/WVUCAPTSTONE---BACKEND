@@ -21,7 +21,11 @@
         }
         else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'logout') {
             logout($_GET['userid']);
-        }else{
+        }
+        else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'getUserInfo') {
+            getUserInfo();
+        }
+        else{
             echo "Specified action not available.";
             http_response_code(201);
             die();

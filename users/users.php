@@ -61,6 +61,26 @@
 
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'userinfo') {
             $user->getUserInfo();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'getUserRoutines') {
+            $user->getUserRoutines();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'assignUserRoutines') {
+            $user->assignUserRoutines();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'addExercise') {
+            $user->addExercise();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'removeUser') {
+            $user->removeUser();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'getExercise') {
+            $user->getExercise();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'getRoutines') {
+            $user->getRoutines();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'removeAssignment') {
+            $user->removeAssignment();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'removeRoutine') {
+            $user->removeRoutine();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'createRoutine') {
+            $user->createRoutine();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'roster') {
+            $user->roster();
         }else{
             echo "Specified action not available.";
             http_response_code(405);
@@ -123,7 +143,7 @@
             }
             $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
             if($row === NULL){
-                echo "User does not exist.";
+                $row = "User does not exist.";
             }
             echo json_encode($row);
             http_response_code(200);
@@ -149,11 +169,18 @@
                 echo "Error in statement preparation/execution.\n";  
                 die( print_r( sqlsrv_errors(), true));  
             }
-            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-            if($row === NULL){
-                echo "User does not exist.";
+
+            $rows = array();
+            $i = 0;
+
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $i++;
+                $rows[] = array('data' => $row);
             }
-            echo json_encode($row);
+            if($i == 0){
+                $rows = "No assigned routines at this time.";
+            }
+            echo json_encode($rows);
             http_response_code(200);
 
         }
@@ -200,14 +227,14 @@
             $descript = $_GET['description'];
 
             $check = "SELECT ExerciseId FROM [dbo].[Exercises] WHERE ExerciseName = '$name'";
-            $res = sqlsrv_query($db, $check);
+            $res = sqlsrv_query($this->db, $check);
             $r = sqlsrv_fetch_array( $res, SQLSRV_FETCH_NUMERIC );
             if( $r !== NULL ){
                 echo 'Exercise Already Exists.';
                 echo json_encode("ID: $r[0]");
                 http_response_code(409); 
                 sqlsrv_free_stmt($res);
-                sqlsrv_close($db);
+                sqlsrv_close($this->db);
                 return False;
             }
 
@@ -268,7 +295,7 @@
             }
             $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
             if($row === NULL){
-                echo "Exercise does not exist.";
+                $row = "Exercise does not exist.";
             }
             echo json_encode($row);
             http_response_code(200);
@@ -289,16 +316,47 @@
                 echo "Error in statement preparation/execution.\n";  
                 die( print_r( sqlsrv_errors(), true));  
             }
-            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-            if($row === NULL){
-                echo "No Routines in System.";
+            $rows = array();
+            $i = 0;
+
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $i++;
+                $rows[] = array('data' => $row);
             }
-            echo json_encode($row);
+            if($i == 0){
+                $rows = "No routines in the system.";
+            }
+            echo json_encode($rows);
             http_response_code(200);
         }
 
         // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=removeRoutine&ID=3
         function removeRoutine() {
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $ID = $_GET['ID'];
+
+            $tsql = "DELETE FROM [dbo].[Routines] WHERE RoutineId = $ID";
+            $stmt = sqlsrv_query($this->db, $tsql);
+
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+
+            echo json_encode(True);
+            return True;
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=removeAssignment&ID=3
+        function removeAssignment() {
 
             if(middlewareAuth($this->UserID) !== true){
                 echo "Session expired. Please login again.";
@@ -331,27 +389,36 @@
                 die();
             }
 
-            $user_name = $_GET['name'];
-            $password = md5($_GET['password']);
-            $first_name = $_GET['firstname'];
-            $middle_name = $_GET['middlename'];
-            $last_name = $_GET['lastname'];
-            $type = $_GET['type'];
-            $player_number = $_GET['playernumber'];
-            $code = $_GET['code'];
+            $name = $_GET['name'];
+            $ID = $_GET['IDs'];
+            $reps = $_GET['reps'];
+            $sets = $_GET['sets'];
+            $vis = $_GET['visible'];
 
             // Check if routine exists
-            $check = "SELECT UserID FROM [dbo].[Users] WHERE Username = '$user_name'";
-            $res = sqlsrv_query($db, $check);
+            $check = "SELECT RoutineId FROM [dbo].[Routines] WHERE RoutineName = '$name'";
+            $res = sqlsrv_query($this->db, $check);
             $r = sqlsrv_fetch_array( $res, SQLSRV_FETCH_NUMERIC );
             if( $r !== NULL ){
                 echo 'Routine Name Exists.';
                 echo json_encode("ID: $r[0]");
                 http_response_code(409); 
                 sqlsrv_free_stmt($res);
-                sqlsrv_close($db);
+                sqlsrv_close($this->db);
                 return False;
             }
+
+            $tsql = "INSERT INTO [dbo].[Routines] values ('$name','$ID','$sets','$reps',$vis)";
+            
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+            echo json_encode(True);
+            return True;
         }
 
 
@@ -383,9 +450,9 @@
                 }
             }
             if ($name != "") {
-                if (strpos($name," ") >= 0) {
+                if (strpos($name," ") != false) {
                     strtolower($name);
-                    $names = split(" ",$name);
+                    $names = explode(" ",$name);
                     $tsql .= " AND (lower(FirstName) like '$names[0]%' AND lower(LastName) like '$names[1]%')";
                 }
                 else {
@@ -395,15 +462,19 @@
             }
             
             $stmt = sqlsrv_query($this->db, $tsql);
-            if( $stmt === false ){  
-                echo "Error in statement preparation/execution.\n";  
-                die( print_r( sqlsrv_errors(), true));  
+
+            $rows = array();
+            $i = 0;
+
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $i++;
+                $rows[] = array('data' => $row);
             }
-            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
-            if($row === NULL){
-                echo "";
+            if($i == 0){
+                $rows = "";
             }
-            echo json_encode($row);
+
+            echo json_encode($rows);
             http_response_code(200);
         }
 
