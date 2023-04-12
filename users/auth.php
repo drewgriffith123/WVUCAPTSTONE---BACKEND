@@ -21,14 +21,18 @@
         }
         else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'logout') {
             logout($_GET['userid']);
-        }else{
+        }
+        else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'getUserInfo') {
+            getUserInfo();
+        }
+        else{
             echo "Specified action not available.";
             http_response_code(201);
             exit();
         }
     }
     // example of a createaccount URL below 
-    // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/auth.php?action=createaccount&name=grantiscool&password=22222222&firstname=Grant&lastname=Holzemer&middlename=Perry&type=P&playernumber=999999999&code=99999999
+    // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/auth.php?action=createaccount&name=grantiscool&password=22222222&firstname=Grant&lastname=Holzemer&middlename=Perry&type=P&playernumber=999999999&code=99999999&position=WR
     function createAccount(){
         $user_name = $_GET['name'];
         $password = md5($_GET['password']);
@@ -38,6 +42,7 @@
         $type = $_GET['type'];
         $player_number = $_GET['playernumber'];
         $code = $_GET['code'];
+        $position = $_GET['position'];
 
         // init db connection
         $database = new database();
@@ -57,7 +62,7 @@
         }
 
         // post new User to DB
-        $sql = "INSERT INTO [dbo].[Users] (FirstName, MiddleName, LastName, UserType, Username, Password, PlayerNumber, Code) VALUES ('$first_name', '$middle_name', '$last_name', '$type', '$user_name', '$password', $player_number, $code)";
+        $sql = "INSERT INTO [dbo].[Users] (FirstName, MiddleName, LastName, UserType, Username, Password, PlayerNumber, Code, Position) VALUES ('$first_name', '$middle_name', '$last_name', '$type', '$user_name', '$password', $player_number, $code, '$position')";
         $stmt = sqlsrv_query($db, $sql);
         if($stmt === False){  
             echo "Error in statement preparation/execution.\n";  
