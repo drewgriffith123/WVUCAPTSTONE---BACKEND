@@ -7,9 +7,9 @@
     You must include the users session token in the Authroization header of the request. Or else nothing will be returned.
     The code will look something like this in react-native
     
-    fetch('https://example.com/profile', {
+    fetch('https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=userinfo', {
     headers: {
-        'Authorization': 'Bearer ' + sessionCookie
+        'Authorization': 'Bearer ' + sessionCookie // Sample token: 8fdd7ed66955cc8c6fc0f5dd0f294017779ce12536311d960f032ce90c7d6902
     }
     })
     .then(response => {
@@ -19,6 +19,7 @@
         // handle error
     });
     */
+    //
     // https://learn.microsoft.com/en-us/sql/connect/php
     //
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -52,12 +53,12 @@
                 // header format is invalid
                 http_response_code(400);
                 echo 'Invalid Authorization header format.';
-                die();
+                exit();
             }
         }else{
             echo "Missing Authorization Header.";
             http_response_code(401);
-            die();
+            exit();
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'userinfo') {
@@ -91,7 +92,6 @@
         }else{
             echo "Specified action not available.";
             http_response_code(405);
-            // die();
         }
     }
 
@@ -112,14 +112,14 @@
             $stmt = sqlsrv_query($this->db, $tsql);
             if( $stmt === false ){  
              echo "Error in statement preparation/execution.\n";  
-             die( print_r( sqlsrv_errors(), true));  
+             exit( print_r( sqlsrv_errors(), true));  
             }
 
             $row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_NUMERIC );
             if($row === NULL){
                 echo "Session expired. Please login again.";
                 http_response_code(401);
-                die();
+                exit();
             }
 
             $this->UserID = $row[0];
@@ -128,7 +128,7 @@
             $statement = sqlsrv_query($this->db, $userTypeSQLStatement);
             if( $statement === false ){  
                 echo "Error in statement preparation/execution.\n";  
-                die( print_r( sqlsrv_errors(), true));  
+                exit( print_r( sqlsrv_errors(), true));  
             }
             $r = sqlsrv_fetch_array( $statement, SQLSRV_FETCH_NUMERIC );
             $this->type = $r[0];
@@ -139,14 +139,14 @@
             if(middlewareAuth($this->UserID) !== true){
                 echo "Session expired. Please login again.";
                 http_response_code(401);
-                die();
+                exit();
             }
 
             $tsql = "SELECT * FROM [dbo].[Users] WHERE UserId = '$this->UserID'";
             $stmt = sqlsrv_query($this->db, $tsql);
             if( $stmt === false ){  
                 echo "Error in statement preparation/execution.\n";  
-                die( print_r( sqlsrv_errors(), true));  
+                exit( print_r( sqlsrv_errors(), true));  
             }
             $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
             if($row === NULL){
@@ -216,6 +216,14 @@
             echo json_encode(True);
             return True;
             // Assigns a user a routine
+            // Evaluate Privledges 
+            // Many to many db relationship?? Might have to rearchitecture tables
+
+        }
+
+        // Dont deassign unless AT sign off
+        function deassignUserRoutines($routineID){
+            // deassigns a user a routine
             // Evaluate Privledges
 
         }
@@ -644,11 +652,14 @@
             http_response_code(200);
         }
 
+
+        // Dont implement yet focus on mvp
         function getUserNotes(){
             // Gets a users notes
     
         }
 
+        // Dont implement yet focus on mvp
         function postUserNotes(){
             // Adds notes to user
 

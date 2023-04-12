@@ -28,7 +28,7 @@
         else{
             echo "Specified action not available.";
             http_response_code(201);
-            die();
+            exit();
         }
     }
     // example of a createaccount URL below 
@@ -66,7 +66,7 @@
         $stmt = sqlsrv_query($db, $sql);
         if($stmt === False){  
             echo "Error in statement preparation/execution.\n";  
-            die( print_r( sqlsrv_errors(), True));  
+            exit( print_r( sqlsrv_errors(), True));  
             echo json_encode(False);
             return False;
         }
@@ -93,7 +93,7 @@
         $stmt = sqlsrv_query($db, $tsql);
         if( $stmt === false ){  
             echo "Error in statement preparation/execution.\n";  
-            die( print_r( sqlsrv_errors(), true));  
+            exit( print_r( sqlsrv_errors(), true));  
         }
         
         if(!($row = sqlsrv_fetch_array( $stmt, SQLSRV_FETCH_NUMERIC ))){
@@ -131,7 +131,7 @@
             $statement = sqlsrv_query($db, $postTokenSQLQuery);
             if( $statement === false ){  
                 echo "Error in statement preparation/execution.\n";  
-                die( print_r( sqlsrv_errors(), true));  
+                exit( print_r( sqlsrv_errors(), true));  
                 return False;
             }
 
@@ -164,7 +164,7 @@
         $stmt = sqlsrv_query($conn, $query);
         if($stmt === False){  
             echo "Error in statement preparation/execution.\n";  
-            die( print_r( sqlsrv_errors(), true));  
+            exit( print_r( sqlsrv_errors(), true));  
             return false;
         }
         echo json_encode("User logged out successfully.");
@@ -209,7 +209,7 @@
         $stmt = sqlsrv_query($conn, $query);
         if($stmt === False){  
             echo "Error in statement preparation/execution.\n";  
-            die( print_r( sqlsrv_errors(), true));  
+            exit( print_r( sqlsrv_errors(), true));  
             return false;
         }
         return true;
