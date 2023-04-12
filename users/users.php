@@ -31,6 +31,7 @@
     
     // this is also including ../config.php
     include './auth.php';
+    include '../fpdf.php';
     if (strpos($_SERVER['REQUEST_URI'], '/users/users.php') !== False) {
         $database = new database();
         $db = $database->getConnection();
@@ -81,6 +82,12 @@
             $user->createRoutine();
         } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'roster') {
             $user->roster();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'startAct') {
+            $user->startAct();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'endAct') {
+            $user->endAct();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'pullLogs') {
+            $user->pullLogs();
         }else{
             echo "Specified action not available.";
             http_response_code(405);
@@ -398,7 +405,7 @@
             // Check if routine exists
             $check = "SELECT RoutineId FROM [dbo].[Routines] WHERE RoutineName = '$name'";
             $res = sqlsrv_query($this->db, $check);
-            $r = sqlsrv_fetch_array( $res, SQLSRV_FETCH_NUMERIC );
+            $r = sqlsrv_fetch_array( $res, SQLSRV_FETCH_ASSOC );
             if( $r !== NULL ){
                 echo 'Routine Name Exists.';
                 echo json_encode("ID: $r[0]");
@@ -475,6 +482,165 @@
             }
 
             echo json_encode($rows);
+            http_response_code(200);
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=startAct&routineId=1
+        function startAct() {
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $routineId = $_GET['routineId'];
+
+            date_default_timezone_set('America/New_York');
+            $date = date('Y-m-d h:i:s a');
+            
+            $tsql = "INSERT INTO [dbo].[Active] values ($this->UserID,'$date',$routineId)";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+            echo json_encode(True);
+            return True;
+
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=endAct&notes=Sore Back
+        function endAct() {
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $notes = $_GET['notes'];
+
+            $check = "SELECT Start, RoutineId FROM [dbo].[Active] WHERE UserId = $this->UserID";
+            $res = sqlsrv_query($this->db, $check);
+            $row = sqlsrv_fetch_array( $res, SQLSRV_FETCH_ASSOC );
+            if( $row == NULL ){
+                echo 'No active routine.';
+                http_response_code(409); 
+                sqlsrv_free_stmt($res);
+                sqlsrv_close($this->db);
+                return False;
+            }
+
+            date_default_timezone_set('America/New_York');
+            $date = date('m-d-Y h:i:s a');
+            $s = $row['Start'];
+            $sdate = $s->format('m-d-Y h:i:s a');
+            $tsql = "INSERT INTO [dbo].[Activity] values ($this->UserID,'$sdate','$date','$notes',$row[RoutineId])";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+
+            $remove = "DELETE FROM [dbo].[Active] WHERE UserId = $this->UserID";
+            $rem = sqlsrv_query($this->db, $remove);
+
+            echo json_encode(True);
+            return True;
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=pullLogs&sdate=2022-07-20&edate=2022-07-21&name=Chase&position=WR
+        function pullLogs(){
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $name = $_GET['name'];
+            $pos = $_GET['position'];
+            $sdate = $_GET['sdate'];
+            $edate = $_GET['edate'];
+
+            $tsql = "SELECT UserId, FirstName, LastName, PlayerNumber, Position FROM [dbo].[Users] WHERE UserType = 'P'";
+
+            if ($pos != "") {
+                if ($pos == "O") {
+                    $tsql .= " AND (Position = 'C' OR Position = 'OG' OR Position = 'OT' OR Position = 'RB' OR Position = 'QB' OR Position = 'WR' OR Position = 'TE')";
+                }
+                else if ($pos == "D") {
+                    $tsql .= " AND (Position = 'DT' OR Position = 'DE' OR Position = 'MLB' OR Position = 'OLB' OR Position = 'CB' OR Position = 'S')";
+                }
+                else if ($pos == "ST") {
+                    $tsql .= " AND (Position = 'P' OR Position = 'K' OR Position = 'H' OR Position = 'LS' OR Position = 'KR' OR Position = 'PR')";
+                }
+                else{
+                    $tsql .= " AND Position = '$pos'";
+                }
+            }
+            if ($name != "") {
+                if (strpos($name," ") != false) {
+                    strtolower($name);
+                    $names = explode(" ",$name);
+                    $tsql .= " AND (lower(FirstName) like '$names[0]%' AND lower(LastName) like '$names[1]%')";
+                }
+                else {
+                    strtolower($name);
+                    $tsql .= " AND (lower(FirstName) like '$name%' OR lower(LastName) like '$name%')";
+                }
+            }
+            
+            $stmt = sqlsrv_query($this->db, $tsql);
+
+            $rows = array();
+            $i = 0;
+            $log = "Player Name Date Start Time End Time Routine Name Exercises Notes";
+
+            while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+                $query = "SELECT RoutineId, StartTime, EndTime, Notes FROM [dbo].[Activity] WHERE UserId = $row[UserId] AND StartTime between '$sdate' AND '$edate'";
+                $stmt2 = sqlsrv_query($this->db, $query);
+                while ($row2 = sqlsrv_fetch_array($stmt2, SQLSRV_FETCH_ASSOC)) {
+                    $rtquery = "SELECT RoutineName, ExerciseIds FROM [dbo].[Routines] WHERE RoutineId = $row2[RoutineId]";
+                    $stmt3 = sqlsrv_query($this->db, $rtquery);
+                    $row3 = sqlsrv_fetch_array($stmt3, SQLSRV_FETCH_ASSOC); 
+                    $ExIds = explode("/",$row3['ExerciseIds']);
+                    $exercises = "";
+                    foreach ($ExIds as &$v) {
+                        $exquery = "SELECT ExerciseName FROM [dbo].[Exercises] WHERE ExerciseId = '$v'";
+                        $stmt4 = sqlsrv_query($this->db, $exquery);
+                        $row4 = sqlsrv_fetch_array($stmt4, SQLSRV_FETCH_ASSOC);
+                        $exercises .= "$row4[ExerciseName] ";
+                    }
+                    $s = $row2['StartTime'];
+                    $sdate = $s->format('m-d-Y h:i:s a');
+                    $e = $row2['EndTime'];
+                    $edate = $e->format('m-d-Y h:i:s a');
+                    $log .= "\n$row[FirstName] $row[LastName] $sdate $edate $row3[RoutineName] $exercises$row2[Notes]";
+                }
+                $i++;
+            }
+            if($i == 0){
+                $log = "";
+            }
+
+            $pdf=new FPDF();
+
+            $pdf->AddPage();
+  
+            // Set the font for the text
+            $pdf->SetFont('Arial', 'B', 10);
+            
+            // Prints a cell with given text 
+            $pdf->Multicell(0,5,$log);
+            
+            // return the generated output
+            $pdf->Output();
+
+            echo $log;
             http_response_code(200);
         }
 
