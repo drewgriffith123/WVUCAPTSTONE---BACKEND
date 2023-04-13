@@ -61,6 +61,26 @@
             return False;
         }
 
+        if ($player_number == "") {
+            $player_number = null;
+        }
+        if ($code == "") {
+            $code = null;
+        }
+        else {
+            $check1 = "SELECT UserID FROM [dbo].[Users] WHERE Code = $code";
+            $res1 = sqlsrv_query($db, $check1);
+            $r1 = sqlsrv_fetch_array( $res1, SQLSRV_FETCH_NUMERIC );
+            if( $r1 !== NULL ){
+            echo 'Duplicate Code In Use.';
+            echo json_encode("ID: $r1[0]");
+            http_response_code(409); 
+            sqlsrv_free_stmt($res);
+            sqlsrv_close($db);
+            return False;
+        }
+        }
+
         // post new User to DB
         $sql = "INSERT INTO [dbo].[Users] (FirstName, MiddleName, LastName, UserType, Username, Password, PlayerNumber, Code, Position) VALUES ('$first_name', '$middle_name', '$last_name', '$type', '$user_name', '$password', $player_number, $code, '$position')";
         $stmt = sqlsrv_query($db, $sql);
