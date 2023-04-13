@@ -86,6 +86,10 @@
             $user->startAct();
         } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'endAct') {
             $user->endAct();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'endActSign') {
+            $user->endActSign();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'signOffRequired') {
+            $user->signOffRequired();
         } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'pullLogs') {
             $user->pullLogs();
         }else{
@@ -388,7 +392,7 @@
             return True;
         }
 
-        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=createRoutine&name=Legs1&IDs=4/5/6&reps=10/10/10&sets=3/4/5&visible=1
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=createRoutine&name=Legs1&IDs=4/11/13&reps=10/10/10&sets=3/4/5&visible=1
         function createRoutine() {
 
             if(middlewareAuth($this->UserID) !== true){
@@ -518,8 +522,44 @@
 
         }
 
-        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=endAct&notes=Sore Back&code=1111
-        function endAct() {
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=signOffRequired
+        function signOffRequired() {
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $check = "SELECT AssignId FROM [dbo].[Active] WHERE UserId = $this->UserID";
+            $res = sqlsrv_query($this->db, $check);
+            $row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC );
+            if( $row == NULL ){
+                echo 'No active routine.';
+                http_response_code(409); 
+                sqlsrv_free_stmt($res);
+                sqlsrv_close($this->db);
+                return False;
+            }
+
+
+            if ($row['AssignId'] != null) {
+                $signcheck = "SELECT Sign FROM Assignments WHERE AssignmentId = $row[AssignId]";
+                $res2 = sqlsrv_query($this->db, $signcheck);
+                $row2 = sqlsrv_fetch_array($res2, SQLSRV_FETCH_ASSOC );
+                if ($row2['Sign'] == 1) {
+                    echo json_encode(True);
+                    return True;
+                } 
+                else {
+                    echo json_encode(False);
+                    return False;
+                }
+            }
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=endActSign&notes=Sore Back&code=1111
+        function endActSign() {
             if(middlewareAuth($this->UserID) !== true){
                 echo "Session expired. Please login again.";
                 http_response_code(401);
@@ -590,7 +630,48 @@
             return True;
         }
 
-        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=pullLogs&sdate=2022-07-20&edate=2022-07-21&name=Chase&position=WR
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=endAct&notes=Sore Back
+        function endAct() {
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $notes = $_GET['notes'];
+
+            $check = "SELECT Start, RoutineId, AssignId FROM [dbo].[Active] WHERE UserId = $this->UserID";
+            $res = sqlsrv_query($this->db, $check);
+            $row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC );
+            if( $row == NULL ){
+                echo 'No active routine.';
+                http_response_code(409); 
+                sqlsrv_free_stmt($res);
+                sqlsrv_close($this->db);
+                return False;
+            }
+
+            date_default_timezone_set('America/New_York');
+            $date = date('m-d-Y h:i:s a');
+            $s = $row['Start'];
+            $sdate = $s->format('m-d-Y h:i:s a');
+            $tsql = "INSERT INTO [dbo].[Activity] values ($this->UserID,'$sdate','$date','$notes',$row[RoutineId])";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if($stmt === False){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), True));  
+                echo json_encode(False);
+                return False;
+            }
+
+            $remove = "DELETE FROM [dbo].[Active] WHERE UserId = $this->UserID";
+            $rem = sqlsrv_query($this->db, $remove);
+
+            echo json_encode(True);
+            return True;
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=pullLogs&sdate=2023-04-11&edate=2023-04-12&name=Chase&position=WR
         function pullLogs(){
             if(middlewareAuth($this->UserID) !== true){
                 echo "Session expired. Please login again.";
