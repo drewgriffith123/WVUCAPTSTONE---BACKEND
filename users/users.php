@@ -72,6 +72,8 @@
             $user->removeUser();
         } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'getExercise') {
             $user->getExercise();
+        } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'routineDetails') {
+            $user->routineDetails();
         } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'getRoutines') {
             $user->getRoutines();
         } else if ($_SERVER['REQUEST_METHOD'] === 'GET' && $_GET['action'] === 'removeAssignment') {
@@ -308,6 +310,32 @@
             $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
             if($row === NULL){
                 $row = "Exercise does not exist.";
+            }
+            echo json_encode($row);
+            http_response_code(200);
+
+        }
+
+        // EXAMPLE: https://restapi-playerscompanion.azurewebsites.net/users/users.php?action=routineDetails&ID=1
+        function routineDetails(){
+
+            if(middlewareAuth($this->UserID) !== true){
+                echo "Session expired. Please login again.";
+                http_response_code(401);
+                die();
+            }
+
+            $ID = $_GET['ID'];
+
+            $tsql = "SELECT RoutineName, ExerciseIds, SetNums, RepNums FROM [dbo].[Routines] WHERE RoutineId = $ID";
+            $stmt = sqlsrv_query($this->db, $tsql);
+            if( $stmt === false ){  
+                echo "Error in statement preparation/execution.\n";  
+                die( print_r( sqlsrv_errors(), true));  
+            }
+            $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+            if($row === NULL){
+                $row = "Routine does not exist.";
             }
             echo json_encode($row);
             http_response_code(200);
