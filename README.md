@@ -16,7 +16,7 @@ Parameters in a url look like:
 
 # Login, Logout, & Create an Account 
 All auth methods below
-## Login | /users/auth.php
+## Create an Account | /users/auth.php
 To have a user create an account we need to send the api the information of the user through the parameters in the URL.
 
 Send a get request to **/users/auth.php** from our react-native app.
